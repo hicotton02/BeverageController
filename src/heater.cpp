@@ -45,5 +45,4 @@ void Heater::disable(){
 void Heater::loop(double currentTemp){
     
     pid.Compute();
-
 }
