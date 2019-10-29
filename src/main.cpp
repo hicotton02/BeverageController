@@ -1,60 +1,68 @@
 #include "sensors.h"
+#include "heater.h"
+#include "display.h"
 
 //pinout
-#define ON_LED 12
-#define USB_TX 1
-#define USB_RX 3
-#define TEMPA_BUS 4           //Onewire1
-#define TEMPC_BUS 5           //onewire2
-#define ELEMENT2_SSR_RELAY 13 //Boiler
-#define ELEMENT1_SSR_RELAY 14 //HLT or Still
-#define PUMP1_RELAY 15        //Main pump or recirculating pump for still
-#define DEBUG_TX 16
-#define DEBUG_RX 17
-#define ELEMENT1_CONTACTOR_RELAY 18 //HLT or Still Boiler Element 2
-#define ERROR_RELAY 19              //Error LED
-#define TEMPB_BUS 23                //Onewire3
-#define ELEMENT2_CONTACTOR_RELAY 25 //Brew Boiler or Still Boiler Element 1
-#define DISPLAY_TX 26
-#define DISPLAY_RX 27
-#define PUMP2_RELAY 33 //Herms Pump
+const int DEBUG_TX = 16;
+const int DEBUG_RX = 17;
+const int DISPLAY_TX = 26;
+const int DISPLAY_RX = 27;
+const int BAUD_RATE = 115200;
+const int HEATER1_CONTACTOR_PIN = 18;
+const int HEATER1_SSR_PIN = 14;
+const int HEATER1_TEMP_PIN = 4;
+const int HEATER2_CONTACTOR_PIN = 25;
+const int HEATER2_SSR_PIN = 13;
+const int HEATER2_TEMP_PIN = 5;
 
-#define BAUD_RATE 115200
 uint64_t chipId;
-typedef struct
-{
-  char ssid[26] = "xxxx";
-  char pass[26] = "xxxxxxxxx";
-  unsigned int hermsEnabled = 1;
-  unsigned int enableDistillPump = 1;
-  char timeZone[4] = "-8";
-} CONFIG_T;
+Display *Display::instance = 0;
+Display *display = display->getInstance();
+Heater heaters[2] = {Heater(HEATER1_CONTACTOR_PIN, HEATER1_SSR_PIN, HEATER1_TEMP_PIN), Heater(HEATER2_CONTACTOR_PIN, HEATER2_SSR_PIN, HEATER2_TEMP_PIN)};
 
-CONFIG_T configuration;
-enum machineStates
+Sensors sensors;
+TaskHandle_t heater1Taskhandle;
+TaskHandle_t heater2Taskhandle;
+
+void heater1Callback(void *parameters)
 {
-  HOME,
-  AUTO_BREW,
-  MANUAL_BREW,
-  AUTO_DISTILL,
-  MANUAL_DISTILL,
-  SETTINGS
-};
+  heaters[0].taskThread();
+}
+
+void heater2Callback(void *parameters)
+{
+  heaters[1].taskThread();
+}
 
 void setup()
 {
+  
   Serial.begin(BAUD_RATE);                                      //Programming
   Serial1.begin(BAUD_RATE, SERIAL_8N1, DISPLAY_RX, DISPLAY_TX); //Display Port
   Serial2.begin(BAUD_RATE, SERIAL_8N1, DEBUG_RX, DEBUG_TX);     //Debug Port
 
   chipId = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
-
-  Sensors sensors;
   sensors.begin();
+  for (Heater heater : heaters)
+  {
+    heater.begin();
+  }
 
+  xTaskCreate(
+      heater1Callback,     /* pvTaskCode */
+      "Heater1Workload",   /* pcName */
+      1000,                /* usStackDepth */
+      NULL,                /* pvParameters */
+      20,                  /* uxPriority */
+      &heater1Taskhandle); /* pxCreatedTask */
+  xTaskCreate(
+      heater2Callback,     /* pvTaskCode */
+      "Heater2Workload",   /* pcName */
+      1000,                /* usStackDepth */
+      NULL,                /* pvParameters */
+      21,                  /* uxPriority */
+      &heater2Taskhandle); /* pxCreatedTask */
 }
 
-void loop()
-{
-  // not used
-}
+//DO NOT USE
+void loop() {}
