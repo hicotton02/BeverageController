@@ -3,17 +3,16 @@
 #include <esp32-hal-gpio.h>
 #include <WString.h>
 
-
 const int TEMP_PRECISION = 9;
 
-Heater::Heater(int slowPin, int fastPin, int oneWireBus)
+Heater::Heater(int s, int f, int o, heater_t t)
 {
-    relayPin = slowPin;
-    ssrPin = fastPin;
-    onewirePin = oneWireBus;
+    relayPin = s;
+    ssrPin = f;
+    onewirePin = o;
     oneWire = OneWire(onewirePin);
     tempSensor = &oneWire;
-    
+    type = t;
 }
 
 void Heater::begin()
@@ -60,12 +59,24 @@ void Heater::taskThread()
 
         vTaskDelay(pdMS_TO_TICKS(750));
         int temp = (int)tempSensor.getTempFByIndex(0);
-        
+
         if (temp > 0 && temp < 212)
         {
             Input = temp;
-            Serial.println(temp);
-            display->updateHltTemp(temp);
+            switch (type)
+            {
+            case Hlt_h:
+                display->updateActualTemp(Hlt_t, temp);
+                break;
+            case Boiler_h:
+                display->updateActualTemp(Boiler_t, temp);
+                break;
+            case Still_h:
+                display->updateActualTemp(Still_t, temp);
+                break;
+            default:
+                break;
+            }
         }
         pid.Compute();
     }

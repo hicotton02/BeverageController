@@ -1,6 +1,8 @@
 #include "sensors.h"
 #include "heater.h"
 #include "display.h"
+#include "HeaterType.h"
+#include <SD.h>
 
 //pinout
 const int DEBUG_TX = 16;
@@ -18,20 +20,30 @@ const int HEATER2_TEMP_PIN = 5;
 uint64_t chipId;
 Display *Display::instance = 0;
 Display *display = display->getInstance();
-Heater heaters[2] = {Heater(HEATER1_CONTACTOR_PIN, HEATER1_SSR_PIN, HEATER1_TEMP_PIN), Heater(HEATER2_CONTACTOR_PIN, HEATER2_SSR_PIN, HEATER2_TEMP_PIN)};
+Heater heaters[2] = {Heater(HEATER1_CONTACTOR_PIN, HEATER1_SSR_PIN, HEATER1_TEMP_PIN, Hlt_h), Heater(HEATER2_CONTACTOR_PIN, HEATER2_SSR_PIN, HEATER2_TEMP_PIN, Boiler_h)};
 
 Sensors sensors;
-TaskHandle_t heater1Taskhandle;
-TaskHandle_t heater2Taskhandle;
+TaskHandle_t heater1TaskHandle;
+TaskHandle_t heater2TaskHandle;
+TaskHandle_t displayReceiveTaskHandle;
+TaskHandle_t displaySendTaskHandle;
 
+//Callbacks
 void heater1Callback(void *parameters)
 {
   heaters[0].taskThread();
 }
-
 void heater2Callback(void *parameters)
 {
   heaters[1].taskThread();
+}
+void displayReceiveCallback(void *parameters)
+{
+  display->listenThread();
+}
+void displaySendCallback(void *parameters)
+{
+  display->sendThread();
 }
 
 void setup()
@@ -43,6 +55,7 @@ void setup()
 
   chipId = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
   sensors.begin();
+  display->begin();
   for (Heater heater : heaters)
   {
     heater.begin();
@@ -50,18 +63,32 @@ void setup()
 
   xTaskCreate(
       heater1Callback,     /* pvTaskCode */
-      "Heater1Workload",   /* pcName */
+      "Heater1Task",   /* pcName */
       1000,                /* usStackDepth */
       NULL,                /* pvParameters */
       20,                  /* uxPriority */
-      &heater1Taskhandle); /* pxCreatedTask */
+      &heater1TaskHandle); /* pxCreatedTask */
   xTaskCreate(
       heater2Callback,     /* pvTaskCode */
-      "Heater2Workload",   /* pcName */
+      "Heater2Task",   /* pcName */
       1000,                /* usStackDepth */
       NULL,                /* pvParameters */
       21,                  /* uxPriority */
-      &heater2Taskhandle); /* pxCreatedTask */
+      &heater2TaskHandle); /* pxCreatedTask */
+  xTaskCreate(
+      displayReceiveCallback,     /* pvTaskCode */
+      "displayReceive",   /* pcName */
+      2000,                       /* usStackDepth */
+      NULL,                       /* pvParameters */
+      1,                          /* uxPriority */
+      &displayReceiveTaskHandle); /* pxCreatedTask */
+  xTaskCreate(
+      displaySendCallback,     /* pvTaskCode */
+      "displaySend",   /* pcName */
+      2000,                    /* usStackDepth */
+      NULL,                    /* pvParameters */
+      2,                       /* uxPriority */
+      &displaySendTaskHandle); /* pxCreatedTask */
 }
 
 //DO NOT USE

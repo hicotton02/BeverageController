@@ -2,6 +2,8 @@
 #define __DISPLAY_H__
 
 #include <Nextion.h>
+#include "HeaterType.h"
+#include "TemperatureSensorType.h"
 
 class Display
 {
@@ -19,6 +21,7 @@ private:
     static bool manualBoilButtonDownPressed;
     static bool manualTimeButtonUpPressed;
     static bool manualTimeButtonDownPressed;
+    static u_int pageDisplayed;
     static NexRtc rtc;
 
     static NexPage lockPage;
@@ -119,49 +122,7 @@ private:
     static NexCheckbox settingsStillPump;
     static NexText settingsTimeZone;
 
-    NexTouch *nex_listen_list[42] = {
-        &settingsPage,
-        &manualDistillPage,
-        &autoDistillPage,
-        &manualBrewPage,
-        &autoBrewPage,
-        &selectPage,
-        &lockPage,
-        &autoBrewMainPumpButton,
-        &autoBrewHermsPumpButton,
-        &autoDistillButton,
-        &manualDistillButton,
-        &settingsButton,
-        &autoBrewButton,
-        &manualBrewButton,
-        &autoBrewHLTButton,
-        &autoBrewBoilButton,
-        &autoBrewNextButton,
-        &manualBrewHLTButton,
-        &manualBrewBoilButton,
-        &manualBrewPumpButton,
-        &manualBrewHermsButton,
-        &manualBrewResetButton,
-        &manualBrewStartButton,
-        &manualDistillBoilButton,
-        &manualDistillPumpButton,
-        &manualDistillSlider,
-        &manualDistillHomeButton,
-        &settingsSaveButton,
-        &settingsCancelButton,
-        &autoBrewHomeButton,
-        &manualBrewHomeButton,
-        &autoDistillHomeButton,
-        &manualDistillHomeButton,
-        &manualBrewHltUpButton,
-        &manualBrewHltDownButton,
-        &manualBrewMltUpButton,
-        &manualBrewMltDownButton,
-        &manualBrewBoilUpButton,
-        &manualBrewBoilDownButton,
-        &manualBrewTimeUpButton,
-        &manualBrewTimeDownButton,
-        NULL};
+    static NexTouch *nex_listen_list[42];
 
     static void UpdateDisplayIPAddress();
     static void ButtonSettingsCancelRelease(void *);
@@ -215,7 +176,10 @@ public:
         return instance;
     }
     void begin();
-    static void updateHltTemp(float t);
+    static void listenThread();
+    static void sendThread();
+    static void updateActualTemp(temperature_sensor_t t, double i);
+    static void updateTargetTemp(temperature_sensor_t t, double i);
 };
 
 #endif /*__DISPLAY_H__*/

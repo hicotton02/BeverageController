@@ -97,7 +97,60 @@ NexText Display::settingsPass = NexText(6, 5, "tPass");
 NexCheckbox Display::settingsHerms = NexCheckbox(6, 8, "cHerms");
 NexCheckbox Display::settingsStillPump = NexCheckbox(6, 10, "cStillPump");
 NexText Display::settingsTimeZone = NexText(6, 11, "tTimeZone");
+u_int Display::pageDisplayed = 0;
 
+bool Display::manualHltButtonUpPressed = false;
+bool Display::manualHltButtonDownPressed = false;
+bool Display::manualMltButtonUpPressed = false;
+bool Display::manualMltButtonDownPressed = false;
+bool Display::manualBoilButtonUpPressed = false;
+bool Display::manualBoilButtonDownPressed = false;
+bool Display::manualTimeButtonUpPressed = false;
+bool Display::manualTimeButtonDownPressed = false;
+
+NexTouch *Display::nex_listen_list[42] = {
+    &settingsPage,
+    &manualDistillPage,
+    &autoDistillPage,
+    &manualBrewPage,
+    &autoBrewPage,
+    &selectPage,
+    &lockPage,
+    &autoBrewMainPumpButton,
+    &autoBrewHermsPumpButton,
+    &autoDistillButton,
+    &manualDistillButton,
+    &settingsButton,
+    &autoBrewButton,
+    &manualBrewButton,
+    &autoBrewHLTButton,
+    &autoBrewBoilButton,
+    &autoBrewNextButton,
+    &manualBrewHLTButton,
+    &manualBrewBoilButton,
+    &manualBrewPumpButton,
+    &manualBrewHermsButton,
+    &manualBrewResetButton,
+    &manualBrewStartButton,
+    &manualDistillBoilButton,
+    &manualDistillPumpButton,
+    &manualDistillSlider,
+    &manualDistillHomeButton,
+    &settingsSaveButton,
+    &settingsCancelButton,
+    &autoBrewHomeButton,
+    &manualBrewHomeButton,
+    &autoDistillHomeButton,
+    &manualDistillHomeButton,
+    &manualBrewHltUpButton,
+    &manualBrewHltDownButton,
+    &manualBrewMltUpButton,
+    &manualBrewMltDownButton,
+    &manualBrewBoilUpButton,
+    &manualBrewBoilDownButton,
+    &manualBrewTimeUpButton,
+    &manualBrewTimeDownButton,
+    NULL};
 
 void Display::begin()
 {
@@ -144,8 +197,119 @@ void Display::begin()
     manualBrewTimeUpButton.attachPop(ButtonBrewTimeUpRelease, &manualBrewTimeUpButton);
     manualBrewTimeUpButton.attachPush(ButtonBrewTimeUpPress, &manualBrewTimeUpButton);
 }
-void Display::updateHltTemp(float t){
-    //find out the page, and update the hltTemp on that page
+void Display::updateActualTemp(temperature_sensor_t t, double i)
+{
+    //find out the page, and update the temp on that page
+    pageDisplayed = getPageDisplayed();
+    Serial2.printf("Page Displayed = ");
+    Serial2.println(pageDisplayed);
+    char temp[6];
+    dtostrf(i, 3, 1, temp);
+
+    switch (t)
+    {
+    case Hlt_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewHltActual.setText(temp);
+            break;
+        case 3:
+            manualBrewHltActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Mlt_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewMltActual.setText(temp);
+            break;
+        case 3:
+            manualBrewMltActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Boiler_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewBoilActual.setText(temp);
+            break;
+        case 3:
+            manualBrewBoilActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Still_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoDistillBoilActual.setText(temp);
+            break;
+        case 3:
+            manualDistillBoilActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Column_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoDistillColumnActual.setText(temp);
+            break;
+        case 3:
+            manualDistillColumnActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Coolant_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            //autoDistillCoolantActual.setText(temp);
+            break;
+        case 3:
+            manualDistillCoolantActual.setText(temp);
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+}
+void Display::updateTargetTemp(temperature_sensor_t t, double i)
+{
+    //find out the page, and update the temp on that page
+}
+void Display::listenThread()
+{
+    for (;;)
+    {
+        nexLoop(Display::nex_listen_list);
+    }
+    vTaskDelete(NULL);
+}
+void Display::sendThread()
+{
+    for (;;)
+    {
+        //feeding watchdog for now
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    vTaskDelete(NULL);
 }
 void Display::UpdateDisplay()
 {
@@ -229,7 +393,7 @@ void Display::UpdateDisplaySsid()
 }
 void Display::GetTime()
 {
-    //  rtc.read_rtc_time(rtcTime, 7);
+    //rtc.read_rtc_time(rtcTime, 7);
 }
 void Display::SetDisplayRTCTime()
 {
@@ -338,29 +502,32 @@ void Display::ButtonBrewTimeDownPress(void *ptr)
 }
 void Display::ButtonSettingRelease(void *ptr)
 {
-    //settingsPage.show();
+    settingsPage.show();
     //state = SETTINGS;
 }
 
 void Display::ButtonManualDistillRelease(void *ptr)
 {
-    //(false, false);
-    Serial2.println("Starting Distilling Session from Manual Button");
+    //EnableSession(false, false);
+    Serial2.println(F("Starting Distilling Session from Manual Button"));
 }
 
 void Display::ButtonAutoDistillRelease(void *ptr)
 {
     //EnableSession(false, true);
+    Serial2.println(F("Starting Distilling Session from Auto Button"));
 }
 
 void Display::ButtonManualBrewRelease(void *ptr)
 {
     //EnableSession(true, false);
+    Serial2.println(F("Starting Brewing Session from Manual Button"));
 }
 
 void Display::ButtonAutoBrewRelease(void *ptr)
 {
     //EnableSession(true, true);
+    Serial2.println(F("Starting Brewing Session from Auto Button"));
 }
 void Display::ButtonAutoBrewHLTRelease(void *ptr)
 {

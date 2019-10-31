@@ -3,8 +3,8 @@
 #include <esp32-hal-gpio.h>
 #include <WString.h>
 
-Pump::Pump(int selectedPin){
-    pin = selectedPin;
+Pump::Pump(int p){
+    pin = p;
 }
 void Pump::begin(){
     Serial2.println(F("Setting up Pump"));
