@@ -1,6 +1,8 @@
+#include "config.h"
 #include "sensors.h"
 #include "heater.h"
 #include "display.h"
+#include "network_wrapper.h"
 #include "HeaterType.h"
 #include <SD.h>
 
@@ -17,6 +19,8 @@ const int HEATER2_CONTACTOR_PIN = 25;
 const int HEATER2_SSR_PIN = 13;
 const int HEATER2_TEMP_PIN = 5;
 
+CONFIG_T configuration;
+
 uint64_t chipId;
 Display *Display::instance = 0;
 Display *display = display->getInstance();
@@ -26,11 +30,13 @@ Heater heaters[2] = {
 
 Sensors *Sensors::instance = 0;
 Sensors *sensors = sensors->getInstance();
+NetworkWrapper nw;
 TaskHandle_t heater1TaskHandle;
 TaskHandle_t heater2TaskHandle;
 TaskHandle_t displayReceiveTaskHandle;
 TaskHandle_t displaySendTaskHandle;
 TaskHandle_t ammeterTaskHandle;
+
 
 //Callbacks
 void heater1Callback(void *parameters)
@@ -61,6 +67,7 @@ void setup()
   Serial2.begin(BAUD_RATE, SERIAL_8N1, DEBUG_RX, DEBUG_TX);     //Debug Port
 
   chipId = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
+  nw.begin(configuration);
   sensors->begin();
   display->begin();
   for (Heater heater : heaters)
