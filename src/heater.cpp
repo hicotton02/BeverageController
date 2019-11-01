@@ -58,21 +58,22 @@ void Heater::taskThread()
         tempSensor.requestTemperatures();
 
         vTaskDelay(pdMS_TO_TICKS(750));
-        int temp = (int)tempSensor.getTempFByIndex(0);
-
+        float temp = tempSensor.getTempFByIndex(0);
+        char tempText[6];
+        dtostrf(temp, 3, 1, tempText);
         if (temp > 0 && temp < 212)
         {
             Input = temp;
             switch (type)
             {
             case Hlt_h:
-                display->updateActualTemp(Hlt_t, temp);
+                display->updateActualTemp(Hlt_t, tempText);
                 break;
             case Boiler_h:
-                display->updateActualTemp(Boiler_t, temp);
+                display->updateActualTemp(Boiler_t, tempText);
                 break;
             case Still_h:
-                display->updateActualTemp(Still_t, temp);
+                display->updateActualTemp(Still_t, tempText);
                 break;
             default:
                 break;

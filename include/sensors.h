@@ -4,20 +4,30 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_ADS1015.h>
+#include "display.h"
 
 class Sensors
 {
 private:
-    Adafruit_BME280 bme;
-    Adafruit_ADS1015 adsLegs[2];
+    static Sensors *instance;
+    Sensors() {}
+    static Adafruit_BME280 bme;
+    static Adafruit_ADS1015 adsLegs[2];
+    Display *display = display->getInstance();
 
 public:
-    int getTemp();
-    float getPressure();
-    float getHumidity();
-    float *getAmperage();
+    static int getTemp();
+    static float getPressure();
+    static float getHumidity();
+    static float getAmperage(int i);
     void begin();
-    Sensors();
+    void amperageTaskThread();
+    static Sensors *getInstance()
+    {
+        if (!instance)
+            instance = new Sensors;
+        return instance;
+    }
 };
 
 #endif /* __SENSORS_H__ */

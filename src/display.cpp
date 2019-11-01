@@ -197,25 +197,87 @@ void Display::begin()
     manualBrewTimeUpButton.attachPop(ButtonBrewTimeUpRelease, &manualBrewTimeUpButton);
     manualBrewTimeUpButton.attachPush(ButtonBrewTimeUpPress, &manualBrewTimeUpButton);
 }
-void Display::updateActualTemp(temperature_sensor_t t, double i)
+void Display::updateAmps(char * leg1, char* leg2){
+    int pageDisplayed = getPageDisplayed();
+    switch (pageDisplayed) {
+    case 2:
+      autoBrewAmpsLeg1.setText(leg1);
+      autoBrewAmpsLeg2.setText(leg2);
+      break;
+    case 3:
+      manualBrewAmpsLeg1.setText(leg1);
+      manualBrewAmpsLeg2.setText(leg2);
+      break;
+    case 4:
+      autoDistillAmpsLeg1.setText(leg1);
+      autoDistillAmpsLeg2.setText(leg2);
+      break;
+    case 5:
+      manualDistillAmpsLeg1.setText(leg1);
+      manualDistillAmpsLeg2.setText(leg2);
+      break;
+    default:
+      break;
+  }
+}
+void Display::updateSsid(char *ssid)
+{
+    int pageDisplayed = getPageDisplayed();
+    switch (pageDisplayed)
+    {
+    case 2:
+        autoBrewSsid.setText(ssid);
+        break;
+    case 3:
+        manualBrewSsid.setText(ssid);
+        break;
+    case 4:
+        autoDistillSsid.setText(ssid);
+        break;
+    case 5:
+        manualDistillSsid.setText(ssid);
+        break;
+    default:
+        break;
+    }
+}
+
+void Display::updateIpAddress(char *ip)
+{
+    int pageDisplayed = getPageDisplayed();
+    switch (pageDisplayed)
+    {
+    case 2:
+        autoBrewIpAddress.setText(ip);
+        break;
+    case 3:
+        manualBrewIpAddress.setText(ip);
+        break;
+    case 4:
+        autoDistillIpAddress.setText(ip);
+        break;
+    case 5:
+        manualDistillIpAddress.setText(ip);
+        break;
+    default:
+        break;
+    }
+}
+
+void Display::updateActualTemp(temperature_sensor_t t, char* v)
 {
     //find out the page, and update the temp on that page
     pageDisplayed = getPageDisplayed();
-    Serial2.printf("Page Displayed = ");
-    Serial2.println(pageDisplayed);
-    char temp[6];
-    dtostrf(i, 3, 1, temp);
-
     switch (t)
     {
     case Hlt_t:
         switch (pageDisplayed)
         {
         case 2:
-            autoBrewHltActual.setText(temp);
+            autoBrewHltActual.setText(v);
             break;
         case 3:
-            manualBrewHltActual.setText(temp);
+            manualBrewHltActual.setText(v);
             break;
         default:
             break;
@@ -225,10 +287,10 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
         switch (pageDisplayed)
         {
         case 2:
-            autoBrewMltActual.setText(temp);
+            autoBrewMltActual.setText(v);
             break;
         case 3:
-            manualBrewMltActual.setText(temp);
+            manualBrewMltActual.setText(v);
             break;
         default:
             break;
@@ -238,10 +300,10 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
         switch (pageDisplayed)
         {
         case 2:
-            autoBrewBoilActual.setText(temp);
+            autoBrewBoilActual.setText(v);
             break;
         case 3:
-            manualBrewBoilActual.setText(temp);
+            manualBrewBoilActual.setText(v);
             break;
         default:
             break;
@@ -251,10 +313,10 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
         switch (pageDisplayed)
         {
         case 2:
-            autoDistillBoilActual.setText(temp);
+            autoDistillBoilActual.setText(v);
             break;
         case 3:
-            manualDistillBoilActual.setText(temp);
+            manualDistillBoilActual.setText(v);
             break;
         default:
             break;
@@ -264,10 +326,10 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
         switch (pageDisplayed)
         {
         case 2:
-            autoDistillColumnActual.setText(temp);
+            autoDistillColumnActual.setText(v);
             break;
         case 3:
-            manualDistillColumnActual.setText(temp);
+            manualDistillColumnActual.setText(v);
             break;
         default:
             break;
@@ -280,7 +342,7 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
             //autoDistillCoolantActual.setText(temp);
             break;
         case 3:
-            manualDistillCoolantActual.setText(temp);
+            manualDistillCoolantActual.setText(v);
             break;
         default:
             break;
@@ -290,9 +352,55 @@ void Display::updateActualTemp(temperature_sensor_t t, double i)
         break;
     }
 }
-void Display::updateTargetTemp(temperature_sensor_t t, double i)
+void Display::updateTargetTemp(temperature_sensor_t t, char * v)
 {
     //find out the page, and update the temp on that page
+    pageDisplayed = getPageDisplayed();
+
+    switch (t)
+    {
+    case Hlt_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewHltTarget.setText(v);
+            break;
+        case 3:
+            manualBrewHltTarget.setText(v);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Mlt_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewMltTarget.setText(v);
+            break;
+        case 3:
+            manualBrewMltTarget.setText(v);
+            break;
+        default:
+            break;
+        }
+        break;
+    case Boiler_t:
+        switch (pageDisplayed)
+        {
+        case 2:
+            autoBrewBoilTarget.setText(v);
+            break;
+        case 3:
+            manualBrewBoilTarget.setText(v);
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
 }
 void Display::listenThread()
 {

@@ -1,12 +1,25 @@
 #include "sensors.h"
 
-Adafruit_BME280 bme;
-Adafruit_ADS1015 adsLegs[2] = {Adafruit_ADS1015(0x48), Adafruit_ADS1015(0x49)};
+Adafruit_BME280 Sensors::bme = Adafruit_BME280();
+Adafruit_ADS1015 Sensors::adsLegs[2] = {
+    Adafruit_ADS1015(0x48),
+    Adafruit_ADS1015(0x49)};
 
-Sensors::Sensors()
+void Sensors::amperageTaskThread()
 {
+    for (;;)
+    {
+        char leg1[5];
+        char leg2[5];
+        float ampsL1 = getAmperage(0);
+        float ampsL2 = getAmperage(1);
+        dtostrf(ampsL1, 4, 1, leg1);
+        dtostrf(ampsL2, 4, 1, leg2);
+        display->updateAmps(leg1, leg2);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    vTaskDelete(NULL);
 }
-
 void Sensors::begin()
 {
 
@@ -34,26 +47,24 @@ float Sensors::getHumidity()
 {
     return bme.readHumidity();
 }
-float *Sensors::getAmperage()
+float Sensors::getAmperage(int i)
 {
-    float amps[2] = {0.0, 0.0};
+    float amps = 0;
     int maxValue = 0;
     int minValue = 0;
-    for (int i = 0; i < 2; i++)
-    {
-        long stopTime = millis() + 500;
-        while (millis() < stopTime)
-        {
-            int readValue = adsLegs[i].readADC_Differential_0_1();
-            if (readValue > maxValue)
-                maxValue = readValue; // update max
-            if (readValue < minValue)
-                minValue = readValue; // update min
-        }
-        amps[i] = ((maxValue - minValue) * 0.036);
 
-        maxValue = -4096;
-        minValue = 0;
+    long stopTime = millis() + 250;
+    while (millis() < stopTime)
+    {
+        int readValue = adsLegs[i].readADC_Differential_0_1();
+        if (readValue > maxValue)
+            maxValue = readValue; // update max
+        if (readValue < minValue)
+            minValue = readValue; // update min
     }
+    amps = ((maxValue - minValue) * 0.036);
+
+    maxValue = -4096;
+    minValue = 0;
     return amps;
 }

@@ -178,8 +178,11 @@ public:
     void begin();
     static void listenThread();
     static void sendThread();
-    static void updateActualTemp(temperature_sensor_t t, double i);
-    static void updateTargetTemp(temperature_sensor_t t, double i);
+    static void updateActualTemp(temperature_sensor_t t, char * v);
+    static void updateTargetTemp(temperature_sensor_t t, char * v);
+    static void updateIpAddress(char *ip);
+    static void updateSsid(char *ssid);
+    static void updateAmps(char * leg1, char * leg2);
 };
 
 #endif /*__DISPLAY_H__*/
