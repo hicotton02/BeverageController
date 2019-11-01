@@ -407,6 +407,7 @@ void Display::listenThread()
     for (;;)
     {
         nexLoop(Display::nex_listen_list);
+        vTaskDelay(10);
     }
     vTaskDelete(NULL);
 }
