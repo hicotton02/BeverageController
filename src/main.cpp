@@ -1,4 +1,6 @@
 #include "config.h"
+#include "brew_controller.h"
+#include "distill_controller.h"
 #include "sensors.h"
 #include "heater.h"
 #include "display.h"
