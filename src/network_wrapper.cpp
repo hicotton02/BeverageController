@@ -4,8 +4,6 @@
 #include <ArduinoOTA.h>
 #include "time.h"
 
-
-
 NetworkWrapper::NetworkWrapper() {}
 
 void NetworkWrapper::begin(CONFIG_T config)
@@ -79,4 +77,5 @@ void NetworkWrapper::getNTPTime(char * timeZone) {
     return;
   }
   Serial2.println(&timeinfo, "%I:%M:%S");
+  display->setDisplayRTCTime(&timeinfo);
 }

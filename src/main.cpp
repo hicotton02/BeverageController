@@ -38,9 +38,13 @@ TaskHandle_t heater2TaskHandle;
 TaskHandle_t displayReceiveTaskHandle;
 TaskHandle_t displaySendTaskHandle;
 TaskHandle_t ammeterTaskHandle;
-
+TaskHandle_t tempSensorTaskHandle;
 
 //Callbacks
+void tempSensorsCallback(void *parameters)
+{
+  sensors->tempSensorTaskThread();
+}
 void heater1Callback(void *parameters)
 {
   heaters[0].taskThread();
@@ -77,6 +81,13 @@ void setup()
     heater.begin();
   }
 
+  xTaskCreate(
+      tempSensorsCallback,    /* pvTaskCode */
+      "tempSensorTask",       /* pcName */
+      1000,                   /* usStackDepth */
+      NULL,                   /* pvParameters */
+      99,                     /* uxPriority */
+      &tempSensorTaskHandle); /* pxCreatedTask */
   xTaskCreate(
       ammeterCallback,     /* pvTaskCode */
       "ammeterTask",       /* pcName */

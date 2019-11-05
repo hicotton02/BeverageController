@@ -1,5 +1,7 @@
 #include "display.h"
 
+NexRtc Display::rtc = NexRtc();
+
 NexPage Display::lockPage = NexPage(0, 0, "Lock");
 
 NexPage Display::selectPage = NexPage(1, 0, "Select");
@@ -197,28 +199,30 @@ void Display::begin()
     manualBrewTimeUpButton.attachPop(ButtonBrewTimeUpRelease, &manualBrewTimeUpButton);
     manualBrewTimeUpButton.attachPush(ButtonBrewTimeUpPress, &manualBrewTimeUpButton);
 }
-void Display::updateAmps(char * leg1, char* leg2){
+void Display::updateAmps(char *leg1, char *leg2)
+{
     int pageDisplayed = getPageDisplayed();
-    switch (pageDisplayed) {
+    switch (pageDisplayed)
+    {
     case 2:
-      autoBrewAmpsLeg1.setText(leg1);
-      autoBrewAmpsLeg2.setText(leg2);
-      break;
+        autoBrewAmpsLeg1.setText(leg1);
+        autoBrewAmpsLeg2.setText(leg2);
+        break;
     case 3:
-      manualBrewAmpsLeg1.setText(leg1);
-      manualBrewAmpsLeg2.setText(leg2);
-      break;
+        manualBrewAmpsLeg1.setText(leg1);
+        manualBrewAmpsLeg2.setText(leg2);
+        break;
     case 4:
-      autoDistillAmpsLeg1.setText(leg1);
-      autoDistillAmpsLeg2.setText(leg2);
-      break;
+        autoDistillAmpsLeg1.setText(leg1);
+        autoDistillAmpsLeg2.setText(leg2);
+        break;
     case 5:
-      manualDistillAmpsLeg1.setText(leg1);
-      manualDistillAmpsLeg2.setText(leg2);
-      break;
+        manualDistillAmpsLeg1.setText(leg1);
+        manualDistillAmpsLeg2.setText(leg2);
+        break;
     default:
-      break;
-  }
+        break;
+    }
 }
 void Display::updateSsid(char *ssid)
 {
@@ -264,7 +268,7 @@ void Display::updateIpAddress(char *ip)
     }
 }
 
-void Display::updateActualTemp(temperature_sensor_t t, char* v)
+void Display::updateActualTemp(temperature_sensor_t t, char *v)
 {
     //find out the page, and update the temp on that page
     pageDisplayed = getPageDisplayed();
@@ -352,7 +356,7 @@ void Display::updateActualTemp(temperature_sensor_t t, char* v)
         break;
     }
 }
-void Display::updateTargetTemp(temperature_sensor_t t, char * v)
+void Display::updateTargetTemp(temperature_sensor_t t, char *v)
 {
     //find out the page, and update the temp on that page
     pageDisplayed = getPageDisplayed();
@@ -459,65 +463,20 @@ void Display::UpdateDisplay()
   }
   */
 }
-void Display::UpdateDisplayIPAddress()
+
+void Display::setDisplayRTCTime(tm *timeinfo)
 {
-    //manualDistillIpAddress.setText(localIp);
-    //manualBrewIpAddress.setText(localIp);
-}
-void Display::UpdateDisplayAmps()
-{
-    /*
-  dtostrf(leg1, 4, 1, ampDisplayLeg1);
-  dtostrf(leg2, 4, 1, ampDisplayLeg2);
-  switch (pageDisplayed) {
-    case 2:
-      autoBrewAmpsLeg1.setText(ampDisplayLeg1);
-      autoBrewAmpsLeg2.setText(ampDisplayLeg2);
-      break;
-    case 3:
-      manualBrewAmpsLeg1.setText(ampDisplayLeg1);
-      manualBrewAmpsLeg2.setText(ampDisplayLeg2);
-      break;
-    case 4:
-      autoDistillAmpsLeg1.setText(ampDisplayLeg1);
-      autoDistillAmpsLeg2.setText(ampDisplayLeg2);
-      break;
-    case 5:
-      manualDistillAmpsLeg1.setText(ampDisplayLeg1);
-      manualDistillAmpsLeg2.setText(ampDisplayLeg2);
-      break;
-    default:
-      break;
-  }
-  */
-}
-void Display::UpdateDisplaySsid()
-{
-    /*
-  autoDistillSsid.setText(configuration.ssid);
-  autoBrewSsid.setText(configuration.ssid);
-  manualDistillSsid.setText(configuration.ssid);
-  manualBrewSsid.setText(configuration.ssid);
-  */
-}
-void Display::GetTime()
-{
-    //rtc.read_rtc_time(rtcTime, 7);
-}
-void Display::SetDisplayRTCTime()
-{
-    /*
-    if (timeinfo.tm_year > 0)
+    unsigned int rtcTime[7] = {0};
+    if (timeinfo->tm_year > 0)
     {
-        rtcTime[0] = timeinfo.tm_year;
-        rtcTime[1] = timeinfo.tm_mon;
-        rtcTime[2] = timeinfo.tm_yday;
-        rtcTime[3] = timeinfo.tm_hour;
-        rtcTime[4] = timeinfo.tm_min;
-        rtcTime[5] = timeinfo.tm_sec;
+        rtcTime[0] = timeinfo->tm_year;
+        rtcTime[1] = timeinfo->tm_mon;
+        rtcTime[2] = timeinfo->tm_yday;
+        rtcTime[3] = timeinfo->tm_hour;
+        rtcTime[4] = timeinfo->tm_min;
+        rtcTime[5] = timeinfo->tm_sec;
         rtc.write_rtc_time(rtcTime);
     }
-    */
 }
 void Display::HomeButtonRelease(void *ptr)
 {

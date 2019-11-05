@@ -1,3 +1,5 @@
+#ifndef __ABV_CALCULATIONS_H__
+#define __ABV_CALCULATIONS_H__
 #include <math.h>
 #include <pgmspace.h>
 #include <Arduino.h>
@@ -101,7 +103,8 @@ float TtoABV(float T, float P, bool nearAzeo)
 };
 float TtoLiquidABV(int stillType, float T, float P)
 {
-    if (stillType == 1)
+    //StillType: 0 = Pot Still, 1 = Reflux Still
+    if (stillType == 0)
     {
         // Calculate the index for the table (1251 is the the azeotrope at 1013.25 hPa and the
         // starting point of the table) in °DC
@@ -126,7 +129,7 @@ float TtoLiquidABV(int stillType, float T, float P)
 }
 float TtoVaporABV(int stillType, float T, float P)
 {
-    if (stillType == 1)
+    if (stillType == 0)
     {
         // Calculate the index for the table (1251 is the the azeotrope at 1013.25 hPa and the
         // starting point of the table) in °DC
@@ -149,4 +152,4 @@ float TtoVaporABV(int stillType, float T, float P)
         return TtoABV(T, P, true);
     }
 }
-
+#endif

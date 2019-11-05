@@ -128,10 +128,6 @@ private:
     static void ButtonSettingsCancelRelease(void *);
     static void ButtonSettingsSaveRelease(void *);
     static void ButtonManualDistillPumpRelease(void *);
-    static void UpdateDisplay();
-    static void UpdateDisplayAmps();
-    static void UpdateDisplaySsid();
-    static void GetTime();
     static void SetDisplayRTCTime();
     static void HomeButtonRelease(void *);
     static void UpdateTimeOnManualBrewPage();
@@ -176,6 +172,7 @@ public:
         return instance;
     }
     void begin();
+    static void UpdateDisplay();
     static void listenThread();
     static void sendThread();
     static void updateActualTemp(temperature_sensor_t t, char * v);
@@ -183,6 +180,7 @@ public:
     static void updateIpAddress(char *ip);
     static void updateSsid(char *ssid);
     static void updateAmps(char * leg1, char * leg2);
+    static void setDisplayRTCTime(tm * timeinfo);
 };
 
 #endif /*__DISPLAY_H__*/

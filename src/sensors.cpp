@@ -1,9 +1,21 @@
 #include "sensors.h"
 
+const int TEMP_PRECISION = 9;
+
 Adafruit_BME280 Sensors::bme = Adafruit_BME280();
 Adafruit_ADS1015 Sensors::adsLegs[2] = {
     Adafruit_ADS1015(0x48),
     Adafruit_ADS1015(0x49)};
+
+OneWire Sensors::oneWires[3] = {
+    OneWire(4),
+    OneWire(23),
+    OneWire(5)};
+
+DallasTemperature Sensors::tempSensors[3] = {
+    DallasTemperature(&oneWires[0]),
+    DallasTemperature(&oneWires[1]),
+    DallasTemperature(&oneWires[2])};
 
 void Sensors::amperageTaskThread()
 {
@@ -20,9 +32,30 @@ void Sensors::amperageTaskThread()
     }
     vTaskDelete(NULL);
 }
+void Sensors::tempSensorTaskThread()
+{
+    for (;;)
+    {
+        for (DallasTemperature sensor : tempSensors)
+        {
+            sensor.requestTemperatures();
+        }
+        vTaskDelay(pdMS_TO_TICKS(750));
+    }
+    vTaskDelete(NULL);
+}
 void Sensors::begin()
 {
-
+    Serial2.println(F("Setting up OneWire Devices"));
+    pinMode(4, INPUT);
+    pinMode(23, INPUT);
+    pinMode(5, INPUT);
+    for (DallasTemperature sensor : tempSensors)
+    {
+        sensor.begin();
+        sensor.setResolution(TEMP_PRECISION);
+        sensor.setWaitForConversion(false);
+    }
     Serial2.println("Setting up BME280");
     Wire.begin(SDA, SCL);
     Wire.setClock(2000000);
@@ -34,18 +67,31 @@ void Sensors::begin()
         leg.setSPS(ADS1015_DR_3300SPS);
     }
 }
-int Sensors::getTemp()
+float Sensors::getTemp(int index)
 {
-    return (int)bme.readTemperature();
+    if (index > 3)
+    {
+        return tempSensors[index].getTempFByIndex(0);
+    }
+    else
+    {
+        return bme.readTemperature();
+    }
 }
 
 float Sensors::getPressure()
 {
-    return bme.readPressure();
+    float v = bme.readPressure();
+    Serial2.printf("Pressure :");
+    Serial2.println(v);
+    return v;
 }
 float Sensors::getHumidity()
 {
-    return bme.readHumidity();
+    float v = bme.readHumidity();
+    Serial2.printf("Humidity :");
+    Serial2.println(v);
+    return v;
 }
 float Sensors::getAmperage(int i)
 {
