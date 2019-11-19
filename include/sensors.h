@@ -1,23 +1,22 @@
 #ifndef __SENSORS_H__
 #define __SENSORS_H__
 
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-#include <Adafruit_ADS1015.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include "display.h"
+class Display;
+class Adafruit_BME280;
+class Adafruit_ADS1015;
+class OneWire;
+class DallasTemperature;
 
 class Sensors
 {
 private:
     static Sensors *instance;
-    Sensors() {}
+    Sensors(); 
     static Adafruit_BME280 bme;
     static Adafruit_ADS1015 adsLegs[2];
     static OneWire oneWires[3];
     static DallasTemperature tempSensors[3];
-    Display *display = display->getInstance();
+    
 
 public:
     static float getTemp(int index);

@@ -1,6 +1,5 @@
 #include "config.h"
-#include "brew_controller.h"
-#include "distill_controller.h"
+#include "controller.h"
 #include "sensors.h"
 #include "heater.h"
 #include "display.h"
@@ -14,24 +13,19 @@ const int DEBUG_RX = 17;
 const int DISPLAY_TX = 26;
 const int DISPLAY_RX = 27;
 const int BAUD_RATE = 115200;
-const int HEATER1_CONTACTOR_PIN = 18;
-const int HEATER1_SSR_PIN = 14;
-const int HEATER1_TEMP_PIN = 4;
-const int HEATER2_CONTACTOR_PIN = 25;
-const int HEATER2_SSR_PIN = 13;
-const int HEATER2_TEMP_PIN = 5;
 
 CONFIG_T configuration;
 
 uint64_t chipId;
 Display *Display::instance = 0;
 Display *display = display->getInstance();
-Heater heaters[2] = {
-    Heater(HEATER1_CONTACTOR_PIN, HEATER1_SSR_PIN, HEATER1_TEMP_PIN, Hlt_h),
-    Heater(HEATER2_CONTACTOR_PIN, HEATER2_SSR_PIN, HEATER2_TEMP_PIN, Boiler_h)};
 
 Sensors *Sensors::instance = 0;
 Sensors *sensors = sensors->getInstance();
+
+Controller *Controller::instance = 0;
+Controller *controller = controller->getInstance();
+
 NetworkWrapper nw;
 TaskHandle_t heater1TaskHandle;
 TaskHandle_t heater2TaskHandle;
@@ -44,14 +38,6 @@ TaskHandle_t tempSensorTaskHandle;
 void tempSensorsCallback(void *parameters)
 {
   sensors->tempSensorTaskThread();
-}
-void heater1Callback(void *parameters)
-{
-  heaters[0].taskThread();
-}
-void heater2Callback(void *parameters)
-{
-  heaters[1].taskThread();
 }
 void displayReceiveCallback(void *parameters)
 {
@@ -76,10 +62,7 @@ void setup()
   nw.begin(configuration);
   sensors->begin();
   display->begin();
-  for (Heater heater : heaters)
-  {
-    heater.begin();
-  }
+
 
   xTaskCreate(
       tempSensorsCallback,    /* pvTaskCode */
@@ -95,20 +78,6 @@ void setup()
       NULL,                /* pvParameters */
       100,                 /* uxPriority */
       &ammeterTaskHandle); /* pxCreatedTask */
-  xTaskCreate(
-      heater1Callback,     /* pvTaskCode */
-      "Heater1Task",       /* pcName */
-      1000,                /* usStackDepth */
-      NULL,                /* pvParameters */
-      20,                  /* uxPriority */
-      &heater1TaskHandle); /* pxCreatedTask */
-  xTaskCreate(
-      heater2Callback,     /* pvTaskCode */
-      "Heater2Task",       /* pcName */
-      1000,                /* usStackDepth */
-      NULL,                /* pvParameters */
-      21,                  /* uxPriority */
-      &heater2TaskHandle); /* pxCreatedTask */
   xTaskCreate(
       displayReceiveCallback,     /* pvTaskCode */
       "displayReceive",           /* pcName */

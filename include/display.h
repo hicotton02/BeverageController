@@ -3,16 +3,16 @@
 
 #include <Nextion.h>
 #include "HeaterType.h"
-#include "TemperatureSensorType.h"
+#include "temperature_sensor_type.h"
+class Controller;
 
 class Display
 {
 
 private:
     static Display *instance;
-    Display()
-    {
-    }
+    Display();
+    
     static bool manualHltButtonUpPressed;
     static bool manualHltButtonDownPressed;
     static bool manualMltButtonUpPressed;
@@ -131,7 +131,6 @@ private:
     static void SetDisplayRTCTime();
     static void HomeButtonRelease(void *);
     static void UpdateTimeOnManualBrewPage();
-    static void ButtonAutoDistillRelease(void *);
     static void ButtonBrewHltUpRelease(void *);
     static void ButtonBrewHltUpPress(void *);
     static void SliderManualDistillRelease(void *);
@@ -146,6 +145,7 @@ private:
     static void ButtonAutoBrewHLTRelease(void *);
     static void ButtonAutoBrewBoilRelease(void *);
     static void ButtonAutoBrewRelease(void *);
+    static void ButtonAutoDistillRelease(void *);
     static void ButtonManualBrewRelease(void *);
     static void ButtonManualDistillRelease(void *);
     static void ButtonSettingRelease(void *);
@@ -175,12 +175,12 @@ public:
     static void UpdateDisplay();
     static void listenThread();
     static void sendThread();
-    static void updateActualTemp(temperature_sensor_t t, char * v);
-    static void updateTargetTemp(temperature_sensor_t t, char * v);
+    static void updateActualTemp(temperature_sensor_t t, char *v);
+    static void updateTargetTemp(temperature_sensor_t t, char *v);
     static void updateIpAddress(char *ip);
     static void updateSsid(char *ssid);
-    static void updateAmps(char * leg1, char * leg2);
-    static void setDisplayRTCTime(tm * timeinfo);
+    static void updateAmps(char *leg1, char *leg2);
+    static void setDisplayRTCTime(tm *timeinfo);
 };
 
 #endif /*__DISPLAY_H__*/

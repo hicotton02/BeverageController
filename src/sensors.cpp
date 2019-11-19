@@ -1,4 +1,10 @@
 #include "sensors.h"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+#include <Adafruit_ADS1015.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include "display.h"
 
 const int TEMP_PRECISION = 9;
 
@@ -16,7 +22,10 @@ DallasTemperature Sensors::tempSensors[3] = {
     DallasTemperature(&oneWires[0]),
     DallasTemperature(&oneWires[1]),
     DallasTemperature(&oneWires[2])};
-
+Sensors::Sensors()
+{
+    Display *display = display->getInstance();
+}
 void Sensors::amperageTaskThread()
 {
     for (;;)
@@ -27,7 +36,7 @@ void Sensors::amperageTaskThread()
         float ampsL2 = getAmperage(1);
         dtostrf(ampsL1, 4, 1, leg1);
         dtostrf(ampsL2, 4, 1, leg2);
-        display->updateAmps(leg1, leg2);
+        Display::updateAmps(leg1, leg2);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     vTaskDelete(NULL);

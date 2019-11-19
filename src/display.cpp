@@ -1,4 +1,5 @@
 #include "display.h"
+#include "controller.h"
 
 NexRtc Display::rtc = NexRtc();
 
@@ -154,6 +155,9 @@ NexTouch *Display::nex_listen_list[42] = {
     &manualBrewTimeDownButton,
     NULL};
 
+Display::Display(){
+    Controller *controller = controller->getInstance();
+}
 void Display::begin()
 {
     Serial2.println("Setting up Display");
@@ -576,25 +580,28 @@ void Display::ButtonSettingRelease(void *ptr)
 
 void Display::ButtonManualDistillRelease(void *ptr)
 {
-    //EnableSession(false, false);
     Serial2.println(F("Starting Distilling Session from Manual Button"));
+    Controller::setType(controller_t::ManualDistill_t);
 }
 
 void Display::ButtonAutoDistillRelease(void *ptr)
 {
-    //EnableSession(false, true);
     Serial2.println(F("Starting Distilling Session from Auto Button"));
+    Controller::setType(controller_t::AutoDistill_t);
+    //Controller::enableSession();
 }
 
 void Display::ButtonManualBrewRelease(void *ptr)
 {
-    //EnableSession(true, false);
+    Controller::setType(controller_t::ManualBrew_t);
+    //Controller::enableSession();
     Serial2.println(F("Starting Brewing Session from Manual Button"));
 }
 
 void Display::ButtonAutoBrewRelease(void *ptr)
 {
-    //EnableSession(true, true);
+    Controller::setType(controller_t::AutoBrew_t);
+    //Controller::enableSession();
     Serial2.println(F("Starting Brewing Session from Auto Button"));
 }
 void Display::ButtonAutoBrewHLTRelease(void *ptr)
@@ -664,8 +671,7 @@ void Display::ButtonManualDistillBoilRelease(void *ptr)
 {
     //Toggle Boiler Element
     Serial2.println("Toggling Boiler Element from Display");
-    //boilElementStatus = !boilElementStatus;
-    //manualDistillBoilButton.setValue(boilElementStatus);
+    
 }
 void Display::SliderManualDistillRelease(void *ptr)
 {

@@ -37,6 +37,9 @@ void Heater::enable(int setTemp)
         digitalWrite(ssrPin, HIGH);
     }
 }
+void Heater::enable(double percentage){
+    
+}
 
 void Heater::disable()
 {

@@ -9,7 +9,8 @@
 class Heater
 {
 public:
-    void enable(int setTemp = 0);
+    void enable(int setTemp = 212);
+    void enable(double percentage = 100);
     void disable();
     void begin();
     void taskThread();
@@ -17,6 +18,7 @@ public:
 
 private:
     heater_t type;
+    bool isEnabled;
     int relayPin, ssrPin, onewireIndex;
     double Input, Setpoint, Output;
     double kp = 2, ki = 5, kd = 1;
